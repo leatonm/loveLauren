@@ -101,6 +101,9 @@
 <body>
 
 <div class="container">
+    <h1 style="text-align:center; font-size:1.8rem; margin-bottom:20px; color:#ff6fa3; font-weight:600;">
+        To Lauren from someone who really likes you
+      </h1>
   <div class="card">
     <div id="message">Tap the button below ✨</div>
   </div>
@@ -147,66 +150,79 @@
     "I will never Keave you :)",
     "There’s something incredibly calming about you.",
     "You are loved.",
+    "There are moments I think about your lips, and it makes my whole chest feel warm.",
+    "I don’t think you realize how kissable you are.",
+    "If I ever get the chance to kiss you, I’m certain I’ll forget how to breathe.",
+    "Your lips look like the kind of soft that could ruin my self-control.",
+    "You make me want to pull you close and never let go.",
+    "I hope one day I get to kiss you and hold your face in my hands.",
+    "There’s something about you that pulls me in without trying.",
+    "You are beautiful in ways that are impossible to ignore.",
+    "Everything about you is stunning — your smile, your eyes, your curves.",
+    "I love the way you move; you’re effortlessly captivating.",
+    "You have a figure that drives me a little crazy — in the best way.",
+    "You’re unbelievably attractive, from your smile to your curves.",
+    "Every part of you is beautiful — truly.",
+    "You make my heart skip in the sweetest way.",
+    "Thinking about you makes everything else fade away.",
+    "You’re impossible to forget once you’re on my mind.",
+    "I hope you know how magnetic you are.",
+    "Being near you feels like coming home.",
     "You shine without ever needing attention.",
     "You're beautiful in the most effortless way.",
     "You bring comfort the way soft blankets and warm tea do.",
     // (More compliments below — 200 total)
   ];
 
-  // Duplicate set to reach 200+ compliments
-  while (compliments.length < 220) {
-    compliments.push(...compliments);
+  // Shuffle function
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
-  compliments.length = 220;
+  return arr;
+}
 
-  // Shuffle
-  function shuffle(arr) {
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
-  }
+// Load or shuffle compliments
+let order = JSON.parse(localStorage.getItem("complimentOrder"));
+if (!order || order.length !== compliments.length) {
+  order = shuffle([...Array(compliments.length).keys()]);
+  localStorage.setItem("complimentOrder", JSON.stringify(order));
+  localStorage.setItem("index", 0);
+}
 
-  // Load or shuffle compliments
-  let order = JSON.parse(localStorage.getItem("complimentOrder"));
-  if (!order || order.length !== compliments.length) {
-    order = shuffle([...Array(compliments.length).keys()]);
-    localStorage.setItem("complimentOrder", JSON.stringify(order));
-    localStorage.setItem("index", 0);
-  }
+let idx = Number(localStorage.getItem("index")) || 0;
 
-  let idx = Number(localStorage.getItem("index")) || 0;
+const btn = document.getElementById("btn");
+const message = document.getElementById("message");
 
-  const btn = document.getElementById("btn");
-  const message = document.getElementById("message");
+btn.addEventListener("click", () => {
+  // Show compliment
+  const compliment = compliments[order[idx]];
+  message.textContent = compliment;
+  message.classList.remove("show");
+  setTimeout(() => message.classList.add("show"), 20);
 
-  btn.addEventListener("click", () => {
-    // Show compliment
-    const compliment = compliments[order[idx]];
-    message.textContent = compliment;
-    message.classList.remove("show");
-    setTimeout(() => message.classList.add("show"), 20);
+  // Update index
+  idx++;
+  if (idx >= compliments.length) idx = 0;
+  localStorage.setItem("index", idx);
 
-    // Update index
-    idx++;
-    if (idx >= compliments.length) idx = 0;
-    localStorage.setItem("index", idx);
+  // Create floating heart
+  createHeart();
+});
 
-    // Create floating heart
-    createHeart();
-  });
+function createHeart() {
+  const heart = document.createElement("div");
+  heart.className = "heart";
+  heart.textContent = "💗";
+  heart.style.left = (Math.random() * 70 + 15) + "vw";  
+  heart.style.fontSize = (Math.random() * 20 + 20) + "px";
+  document.body.appendChild(heart);
 
-  function createHeart() {
-    const heart = document.createElement("div");
-    heart.className = "heart";
-    heart.textContent = "💗";
-    heart.style.left = (Math.random() * 70 + 15) + "vw";  
-    heart.style.fontSize = (Math.random() * 20 + 20) + "px";
-    document.body.appendChild(heart);
+  setTimeout(() => heart.remove(), 2600);
+}
 
-    setTimeout(() => heart.remove(), 2600);
-  }
 </script>
 
 </body>
