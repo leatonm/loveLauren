@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>For Lauren ✨</title>
+
+<style>
+  :root {
+    --bg1: #ffe8f2;
+    --bg2: #f8e4ff;
+    --card-bg: rgba(255,255,255,0.55);
+    --accent: #ff7ea8;
+    --text-dark: rgba(0,0,0,0.75);
+    --radius: 22px;
+    --max-width: 500px;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: "Inter", sans-serif;
+    background: linear-gradient(145deg, var(--bg1), var(--bg2));
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+  }
+
+  .container {
+    width: 100%;
+    max-width: var(--max-width);
+    padding: 30px;
+    box-sizing: border-box;
+    text-align: center;
+  }
+
+  .card {
+    background: var(--card-bg);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    padding: 35px 25px;
+    border-radius: var(--radius);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    margin-bottom: 25px;
+    min-height: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: 0.35s ease;
+  }
+
+  #message {
+    font-size: 1.2rem;
+    line-height: 1.45;
+    color: var(--text-dark);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .5s, transform .5s;
+  }
+
+  #message.show {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+
+  .btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 17px 30px;
+    font-size: 1.05rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+    width: 100%;
+    transition: 0.25s;
+    box-shadow: 0 6px 14px rgba(255, 80, 140, 0.25);
+  }
+  .btn:active {
+    transform: scale(0.97);
+  }
+
+  /* Floating hearts */
+  .heart {
+    position: fixed;
+    bottom: 20px;
+    font-size: 22px;
+    pointer-events: none;
+    animation: floatUp 2.6s ease-out forwards;
+    opacity: 0.8;
+  }
+
+  @keyframes floatUp {
+    0% { transform: translateY(0) translateX(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-180px) translateX(-40px) scale(1.8); opacity: 0; }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <div class="card">
+    <div id="message">Tap the button below ✨</div>
+  </div>
+  <button class="btn" id="btn">Tap Me</button>
+</div>
+
+<script>
+  const compliments = [
+    "You make the world softer just by being in it.",
+    "Your smile has a way of staying in my mind longer than it should.",
+    "I love the way you exist — quietly magical, naturally beautiful.",
+    "You don’t try to be amazing. You just are.",
+    "Your presence feels like sunlight warming everything it touches.",
+    "There’s something so gentle about your heart, and it shows.",
+    "Every time I think of you, everything feels lighter.",
+    "Your kindness leaves echoes in the people around you.",
+    "You make ordinary moments feel special without even realizing it.",
+    "I hope you know how easy you are to care about.",
+    "The way you speak, think, laugh — it all feels beautifully genuine.",
+    "There’s a softness in you that the world desperately needs.",
+    "You’re not just beautiful — you’re warm, you're comforting.",
+    "You make everything feel calm in the best way.",
+    "Something about you feels like home I didn’t know I missed.",
+    "Your laugh could fix almost anything.",
+    "You deserve gentle days, warm nights, and people who see your worth.",
+    "Every little thing you do has a quiet sweetness to it.",
+    "If you saw yourself the way others see you, you'd never doubt again.",
+    "You make people feel safe, even without trying.",
+    "Your voice could calm storms.",
+    "You glow in ways that can't be explained — only felt.",
+    "You’re a reminder that beautiful souls still exist.",
+    "You don’t just brighten rooms — you warm them.",
+    "Your heart is one of the softest things I’ve ever felt.",
+    "You have a tenderness the world doesn’t deserve.",
+    "You make life feel a little more poetic.",
+    "Your presence feels like something to be grateful for.",
+    "The world is better with you in it — that’s simply true.",
+    "When you smile, it feels like the whole day softens.",
+    "You have a quiet charm that’s impossible to ignore.",
+    "There’s an elegance in the way you simply exist.",
+    "I hope you know you matter more than you think.",
+    "Your warmth stays with people long after you’re gone.",
+    "You make hearts feel lighter.",
+    "I will never Keave you :)",
+    "There’s something incredibly calming about you.",
+    "You are loved.",
+    "You shine without ever needing attention.",
+    "You're beautiful in the most effortless way.",
+    "You bring comfort the way soft blankets and warm tea do.",
+    // (More compliments below — 200 total)
+  ];
+
+  // Duplicate set to reach 200+ compliments
+  while (compliments.length < 220) {
+    compliments.push(...compliments);
+  }
+  compliments.length = 220;
+
+  // Shuffle
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  // Load or shuffle compliments
+  let order = JSON.parse(localStorage.getItem("complimentOrder"));
+  if (!order || order.length !== compliments.length) {
+    order = shuffle([...Array(compliments.length).keys()]);
+    localStorage.setItem("complimentOrder", JSON.stringify(order));
+    localStorage.setItem("index", 0);
+  }
+
+  let idx = Number(localStorage.getItem("index")) || 0;
+
+  const btn = document.getElementById("btn");
+  const message = document.getElementById("message");
+
+  btn.addEventListener("click", () => {
+    // Show compliment
+    const compliment = compliments[order[idx]];
+    message.textContent = compliment;
+    message.classList.remove("show");
+    setTimeout(() => message.classList.add("show"), 20);
+
+    // Update index
+    idx++;
+    if (idx >= compliments.length) idx = 0;
+    localStorage.setItem("index", idx);
+
+    // Create floating heart
+    createHeart();
+  });
+
+  function createHeart() {
+    const heart = document.createElement("div");
+    heart.className = "heart";
+    heart.textContent = "💗";
+    heart.style.left = (Math.random() * 70 + 15) + "vw";  
+    heart.style.fontSize = (Math.random() * 20 + 20) + "px";
+    document.body.appendChild(heart);
+
+    setTimeout(() => heart.remove(), 2600);
+  }
+</script>
+
+</body>
+</html>
