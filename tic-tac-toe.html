@@ -140,7 +140,7 @@
         let myTurn = true;
         let gameOver = false;
 
-        // Create board cells
+        // create board
         for (let i = 0; i < 9; i++) {
             const cell = document.createElement('div');
             cell.className = 'cell';
@@ -152,52 +152,47 @@
         function makeMove(i) {
             if (!myTurn || gameOver) return;
             if (board[i] !== '') return;
+
             board[i] = player;
-            checkGameEnd();
-            saveBoard();
-        }
+            myTurn = false;
 
-        function checkGameEnd() {
+            const updates = {
+                board: board,
+                turn: player === '💙' ? '💗' : '💙'
+            };
+
             if (checkWin(player)) {
+                updates.status = player + ' wins! 💖';
                 gameOver = true;
-                db.ref('games/' + gameCode + '/status').set(player + ' wins! 💖');
             } else if (board.every(c => c !== '')) {
+                updates.status = "It's a draw!";
                 gameOver = true;
-                db.ref('games/' + gameCode + '/status').set("It's a draw!");
-            } else {
-                myTurn = false;
-                db.ref('games/' + gameCode + '/turn').set(player === '💙' ? '💗' : '💙');
             }
+
+            db.ref('games/' + gameCode).update(updates);
         }
 
-        function updateBoard() {
-            board.forEach((val, i) => {
-                boardEl.children[i].textContent = val;
-            });
+        function updateBoardUI() {
+            board.forEach((val, i) => boardEl.children[i].textContent = val);
         }
 
-        function saveBoard() {
+        function loadGame() {
             if (!gameCode) return;
-            db.ref('games/' + gameCode + '/board').set(board);
-        }
+            db.ref('games/' + gameCode).on('value', snapshot => {
+                const data = snapshot.val();
+                if (!data) return;
 
-        function loadBoard() {
-            if (!gameCode) return;
-            db.ref('games/' + gameCode).on('value', (snapshot) => {
-                const saved = snapshot.val();
-                if (!saved) return;
+                board = data.board || Array(9).fill('');
+                updateBoardUI();
 
-                board = saved.board || Array(9).fill('');
-                updateBoard();
-
-                // Determine whose turn it is
-                if (saved.status) {
-                    statusEl.textContent = saved.status;
+                if (data.status) {
+                    statusEl.textContent = data.status;
                     gameOver = true;
                     resetBtn.style.display = 'inline-block';
                 } else {
-                    myTurn = saved.turn === player;
+                    myTurn = data.turn === player;
                     statusEl.textContent = myTurn ? "Your turn!" : "Waiting for other player...";
+                    resetBtn.style.display = 'none';
                 }
             });
         }
@@ -227,7 +222,7 @@
                     player = '💗';
                     statusEl.textContent = "You are 💗, waiting for 💙...";
                 }
-                loadBoard();
+                loadGame();
             });
         });
 
@@ -241,7 +236,6 @@
             resetBtn.style.display = 'none';
         });
     </script>
-
 </body>
 
 </html>
