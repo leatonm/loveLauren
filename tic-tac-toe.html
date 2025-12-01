@@ -109,7 +109,25 @@
 
     <div id="board"></div>
 
+    <!-- Firebase scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
     <script>
+        // Your Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCJGLgGqHL5aTrtZ1x9uvYblmcFeBJVKp4",
+            authDomain: "lovelaurengame.firebaseapp.com",
+            databaseURL: "https://lovelaurengame-default-rtdb.firebaseio.com",
+            projectId: "lovelaurengame",
+            storageBucket: "lovelaurengame.appspot.com",
+            messagingSenderId: "180354838444",
+            appId: "1:180354838444:web:d88cdbae090427986c5409"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
         const boardEl = document.getElementById('board');
         const statusEl = document.getElementById('status');
         const codeInput = document.getElementById('codeInput');
@@ -149,48 +167,57 @@
             statusEl.textContent = "Waiting for other player...";
         }
 
-        // Update board UI
         function updateBoard() {
             board.forEach((val, i) => {
                 boardEl.children[i].textContent = val;
             });
         }
 
-        // Save to localStorage keyed by game code
         function saveBoard() {
             if (!gameCode) return;
-            const state = { board, turn: player === '💙' ? '💗' : '💙' };
-            localStorage.setItem('ttt-' + gameCode, JSON.stringify(state));
+            db.ref('games/' + gameCode).set({
+                board,
+                turn: player === '💙' ? '💗' : '💙'
+            });
         }
 
-        // Load from localStorage
         function loadBoard() {
             if (!gameCode) return;
-            const saved = JSON.parse(localStorage.getItem('ttt-' + gameCode));
-            if (saved) {
+            db.ref('games/' + gameCode).on('value', (snapshot) => {
+                const saved = snapshot.val();
+                if (!saved) return;
+
                 board = saved.board;
                 myTurn = saved.turn === player;
                 updateBoard();
                 statusEl.textContent = myTurn ? "Your turn!" : "Waiting for other player...";
-            }
+            });
         }
 
-        // Polling every 1.5s to get other player moves
-        setInterval(() => { if (gameCode) loadBoard(); }, 1500);
+        function checkWin(p) {
+            const combos = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+            return combos.some(c => c.every(i => board[i] === p));
+        }
 
-        // Join game
         joinBtn.addEventListener('click', () => {
             if (!codeInput.value) return alert('Enter a code!');
             gameCode = codeInput.value.trim();
-            // Decide player emoji
-            if (localStorage.getItem('ttt-' + gameCode) === null) {
-                player = '💙';
-                statusEl.textContent = "You are 💙, your turn!";
-            } else {
-                player = '💗';
-                statusEl.textContent = "You are 💗, waiting for 💙...";
-            }
-            loadBoard();
+
+            // Determine player emoji
+            db.ref('games/' + gameCode).get().then(snapshot => {
+                if (!snapshot.exists()) {
+                    player = '💙';
+                    statusEl.textContent = "You are 💙, your turn!";
+                } else {
+                    player = '💗';
+                    statusEl.textContent = "You are 💗, waiting for 💙...";
+                }
+                loadBoard();
+            });
         });
     </script>
 
