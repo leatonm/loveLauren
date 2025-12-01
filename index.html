@@ -323,6 +323,89 @@
       document.body.appendChild(heart);
       setTimeout(() => heart.remove(), 2500);
     });
+
+    let pressTimer;
+
+    // Start the timer when the button is pressed or touched
+    btn.addEventListener("mousedown", startLongPress);
+    btn.addEventListener("touchstart", startLongPress);
+
+    function startLongPress(e) {
+      e.preventDefault(); // prevent double triggering with touch+mouse
+      pressTimer = setTimeout(() => {
+        const secretHeart = document.createElement("div");
+        secretHeart.className = "heart";
+        secretHeart.style.fontSize = "28px";
+        secretHeart.style.left = "50vw";
+        secretHeart.textContent = "💌 You're smart and sexy, you smexy💗";
+        document.body.appendChild(secretHeart);
+        setTimeout(() => secretHeart.remove(), 5000);
+      }, 2000); // 2-second long press
+    }
+
+    // Cancel the timer if the press is released or the pointer leaves
+    btn.addEventListener("mouseup", cancelLongPress);
+    btn.addEventListener("mouseleave", cancelLongPress);
+    btn.addEventListener("touchend", cancelLongPress);
+    btn.addEventListener("touchcancel", cancelLongPress);
+
+    function cancelLongPress() {
+      clearTimeout(pressTimer);
+    }
+
+
+    // Tap combo secret
+    const comboSequence = ['heart', 'lauren', 'heart', 'lauren']; // correct order
+    let comboIndex = 0;
+
+    const laurenName = document.querySelector('h1'); // the "Lauren 💗" element
+
+    function checkCombo(element) {
+      const target = element === btn ? 'heart' : (element === laurenName ? 'lauren' : null);
+      if (target === comboSequence[comboIndex]) {
+        comboIndex++;
+        if (comboIndex === comboSequence.length) {
+          revealComboMessage();
+          comboIndex = 0; // reset for future combos
+        }
+      } else {
+        comboIndex = 0; // reset if wrong
+      }
+    }
+
+    function revealComboMessage() {
+      // Turn background black
+      document.body.style.background = '#000';
+
+      // Create message element
+      const secretMessage = document.createElement('div');
+      secretMessage.style.position = 'fixed';
+      secretMessage.style.inset = '0';
+      secretMessage.style.display = 'flex';
+      secretMessage.style.justifyContent = 'center';
+      secretMessage.style.alignItems = 'center';
+      secretMessage.style.color = 'white';
+      secretMessage.style.fontSize = '1.25rem';
+      secretMessage.style.lineHeight = '1.6';
+      secretMessage.style.background = 'rgba(0,0,0,0.95)';
+      secretMessage.style.padding = '20px';
+      secretMessage.style.textAlign = 'center';
+      secretMessage.style.zIndex = '9999';
+      secretMessage.textContent = "I want you to know that what I feel for you is real, deeper than words can hold. If this ever comes to an end, it will never be because I stopped caring—but because you chose it. Even then, I will understand, and I will still be here, quietly holding space for you, even when it hurts. Your happiness has always been, and will always be, everything to me.";
+
+      document.body.appendChild(secretMessage);
+
+      // Optional: remove message after some time
+      setTimeout(() => {
+        secretMessage.remove();
+        document.body.style.background = 'linear-gradient(140deg, var(--bg1), var(--bg2))'; // reset background
+      }, 20000); // 15 seconds
+    }
+
+    // Add listeners for combo taps
+    btn.addEventListener('click', () => checkCombo(btn));
+    laurenName.addEventListener('click', () => checkCombo(laurenName));
+
   </script>
 
 </body>
