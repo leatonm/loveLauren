@@ -105,6 +105,7 @@
         <input id="codeInput" placeholder="Enter game code" />
         <button class="btn" id="joinBtn">Join Game</button>
         <div id="status">Enter a code to start!</div>
+        <button class="btn" id="resetBtn" style="display:none; margin-top:10px;">Play Again</button>
     </div>
 
     <div id="board"></div>
@@ -114,7 +115,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
     <script>
-        // Your Firebase config
         const firebaseConfig = {
             apiKey: "AIzaSyCJGLgGqHL5aTrtZ1x9uvYblmcFeBJVKp4",
             authDomain: "lovelaurengame.firebaseapp.com",
@@ -132,11 +132,13 @@
         const statusEl = document.getElementById('status');
         const codeInput = document.getElementById('codeInput');
         const joinBtn = document.getElementById('joinBtn');
+        const resetBtn = document.getElementById('resetBtn');
 
         let board = Array(9).fill('');
         let player = '💙';
         let gameCode = '';
         let myTurn = true;
+        let gameOver = false;
 
         // Create board cells
         for (let i = 0; i < 9; i++) {
@@ -148,23 +150,24 @@
         }
 
         function makeMove(i) {
-            if (!myTurn) return;
+            if (!myTurn || gameOver) return;
             if (board[i] !== '') return;
             board[i] = player;
-            updateBoard();
+            checkGameEnd();
             saveBoard();
+        }
+
+        function checkGameEnd() {
             if (checkWin(player)) {
-                statusEl.textContent = `${player} wins! 💖`;
+                gameOver = true;
+                db.ref('games/' + gameCode + '/status').set(player + ' wins! 💖');
+            } else if (board.every(c => c !== '')) {
+                gameOver = true;
+                db.ref('games/' + gameCode + '/status').set("It's a draw!");
+            } else {
                 myTurn = false;
-                return;
+                db.ref('games/' + gameCode + '/turn').set(player === '💙' ? '💗' : '💙');
             }
-            if (board.every(c => c)) {
-                statusEl.textContent = "It's a draw!";
-                myTurn = false;
-                return;
-            }
-            myTurn = false;
-            statusEl.textContent = "Waiting for other player...";
         }
 
         function updateBoard() {
@@ -175,10 +178,7 @@
 
         function saveBoard() {
             if (!gameCode) return;
-            db.ref('games/' + gameCode).set({
-                board,
-                turn: player === '💙' ? '💗' : '💙'
-            });
+            db.ref('games/' + gameCode + '/board').set(board);
         }
 
         function loadBoard() {
@@ -187,10 +187,18 @@
                 const saved = snapshot.val();
                 if (!saved) return;
 
-                board = saved.board;
-                myTurn = saved.turn === player;
+                board = saved.board || Array(9).fill('');
                 updateBoard();
-                statusEl.textContent = myTurn ? "Your turn!" : "Waiting for other player...";
+
+                // Determine whose turn it is
+                if (saved.status) {
+                    statusEl.textContent = saved.status;
+                    gameOver = true;
+                    resetBtn.style.display = 'inline-block';
+                } else {
+                    myTurn = saved.turn === player;
+                    statusEl.textContent = myTurn ? "Your turn!" : "Waiting for other player...";
+                }
             });
         }
 
@@ -207,10 +215,13 @@
             if (!codeInput.value) return alert('Enter a code!');
             gameCode = codeInput.value.trim();
 
-            // Determine player emoji
             db.ref('games/' + gameCode).get().then(snapshot => {
                 if (!snapshot.exists()) {
                     player = '💙';
+                    db.ref('games/' + gameCode).set({
+                        board: Array(9).fill(''),
+                        turn: '💙'
+                    });
                     statusEl.textContent = "You are 💙, your turn!";
                 } else {
                     player = '💗';
@@ -218,6 +229,16 @@
                 }
                 loadBoard();
             });
+        });
+
+        resetBtn.addEventListener('click', () => {
+            if (!gameCode) return;
+            db.ref('games/' + gameCode).set({
+                board: Array(9).fill(''),
+                turn: '💙'
+            });
+            gameOver = false;
+            resetBtn.style.display = 'none';
         });
     </script>
 
