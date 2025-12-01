@@ -192,8 +192,10 @@
                 } else {
                     myTurn = data.turn === player;
                     statusEl.textContent = myTurn ? "Your turn!" : "Waiting for other player...";
+                    gameOver = false; // ensure gameOver flag is cleared
                     resetBtn.style.display = 'none';
                 }
+
             });
         }
 
@@ -228,13 +230,17 @@
 
         resetBtn.addEventListener('click', () => {
             if (!gameCode) return;
-            db.ref('games/' + gameCode).set({
+
+            db.ref('games/' + gameCode).update({
                 board: Array(9).fill(''),
-                turn: '💙'
+                turn: '💙',
+                status: null
             });
+
             gameOver = false;
             resetBtn.style.display = 'none';
         });
+
     </script>
 </body>
 
