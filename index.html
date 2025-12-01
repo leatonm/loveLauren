@@ -331,7 +331,7 @@
     btn.addEventListener("touchstart", startLongPress);
 
     function startLongPress(e) {
-      e.preventDefault(); // prevent double triggering with touch+mouse
+      // e.preventDefault(); // <-- this can block pointer events for tap combos
       pressTimer = setTimeout(() => {
         const secretHeart = document.createElement("div");
         secretHeart.className = "heart";
@@ -340,8 +340,9 @@
         secretHeart.textContent = "💌 You're smart and sexy, you smexy💗";
         document.body.appendChild(secretHeart);
         setTimeout(() => secretHeart.remove(), 5000);
-      }, 2000); // 2-second long press
+      }, 2000);
     }
+
 
     // Cancel the timer if the press is released or the pointer leaves
     btn.addEventListener("mouseup", cancelLongPress);
@@ -403,8 +404,10 @@
     }
 
     // Add listeners for combo taps
-    btn.addEventListener('click', () => checkCombo(btn));
-    laurenName.addEventListener('click', () => checkCombo(laurenName));
+    // Replace your click listeners for combo with pointerdown
+    btn.addEventListener('pointerdown', () => checkCombo(btn));
+    laurenName.addEventListener('pointerdown', () => checkCombo(laurenName));
+
 
   </script>
 
