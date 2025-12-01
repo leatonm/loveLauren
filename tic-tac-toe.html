@@ -162,7 +162,7 @@
             };
 
             if (checkWin(player)) {
-                updates.status = player + ' wins! 💖';
+                updates.status = player + ' wins!';
                 gameOver = true;
             } else if (board.every(c => c !== '')) {
                 updates.status = "It's a draw!";
