@@ -101,6 +101,25 @@
       transform-origin: center;
     }
 
+    .link-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 12px 24px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(95, 150, 255, 0.38);
+      text-decoration: none;
+      display: inline-block;
+      transition: 0.25s;
+    }
+
+    .link-btn:hover {
+      filter: brightness(1.1);
+    }
+
+
     #message {
       font-size: 1.22rem;
       font-weight: 500;
@@ -179,7 +198,16 @@
     <div class="button-wrapper">
       <button class="heart-btn" id="btn">💗</button>
     </div>
+
+    <!-- Tic-Tac-Toe link -->
+    <div style="margin-top: 16px;">
+      <a href="/tic-tac-toe.html" class="link-btn">
+        🎮 Play Tic-Tac-Toe
+      </a>
+    </div>
+
   </div>
+
 
   <script>
     const notes = [
